@@ -53,9 +53,16 @@ function preprocess_photometry(mat_filepath::String,analog_filepath::String)
     session=join(session_sig,session_ref;on = :Frame);
     # take the timestamp and the analog signal from the national board to find the frame
     # corresponding to poke in
-    csvvars=CSV.read(analog_filepath, header = 0, nullable = false);
+    csvvars=CSV.read(analog_filepath, header = 0, allowmissing=:none);
     timestamp = csvvars[:Column1];
     analog = csvvars[:Column2];
+    diff_analog=[]
+    for i=2:size(analog,1) #calculate derivative to find the first poke and set to 0 everything before
+        res = analog[i-1]-analog[i]
+        push!(diff_analog,res)
+    end
+    firstpoke = findfirst(diff_analog.<-4)
+    analog[1:firstpoke] = 0
     digital = analog.>mean(analog); #digital poke signal that is actually a boolean vector
     pokein_analog_idx = find(.!digital[1:end-1] .& digital[2:end]); # from false to true
     pokein_analog_idx= pokein_analog_idx.-100; #pokes are consider valid only after 100 ms so the actual time as to be redirived
@@ -478,7 +485,9 @@ function arrange_traces(DataIndex::DataFrame,Session::String)#"NB5_170527"
     ###check columns name and correct session with wrong labeling: 2 control instead than Left Right control
     check_names!(traces)
     #Assignes new name to columns in order to identify the plugged fiber in a general way
-    renamefibers!(traces)
+    if in(:PLUGGED,names(traces))
+        renamefibers!(traces)
+    end
     Cols = traces.colindex.names;
     Columns = string.(Cols);
     result = Columns[contains.(Columns,"_sig").|contains.(Columns,"_ref")]
@@ -517,8 +526,11 @@ function prep_fluo(trace)
     push!(lista,:Pokes);
     push!(lista,:Baseline)
     fluo = DataFrame()
-    for i in [:MouseID, :Day, :Session, :PLUGGED, :Exp_Path]
+    for i in [:MouseID, :Day, :Session, :Exp_Path]
         fluo[i] = fill(trace[1,i],maximum(trace[:TrialWindow_n]))
+    end
+    if in(:PLUGGED,names(trace))
+        fluo[:PLUGGED] = fill(trace[1,:PLUGGED],maximum(trace[:TrialWindow_n]))
     end
     trials = sort(union(trace[:StreakIn_n]))
     shift!(trials)
