@@ -1,10 +1,8 @@
-export adjust_logfile
-
 """
 `adjust_logfile`
 """
 function adjust_logfile(analog_filepath, converted_rate = 50, acquisition_rate = 1000)
-    analog = FileIO.load(analog_filepath,header_exists=false) |> DataFrame
+    analog = CSV.read(analog_filepath,header=false) |> DataFrame
     analog = analog[:,1:6];
     names!(analog,[:timestamp,:R_p,:L_p,:Rew,:SideHigh,:Protocol])
     analog[:Rew] = analog[:Rew] .* -1

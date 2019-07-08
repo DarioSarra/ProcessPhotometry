@@ -1,6 +1,3 @@
-export observe_events, find_events
-
-
 """
 `observe_events`
 identify all the pokes in and out and return a dataframe with the ordered index

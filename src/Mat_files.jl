@@ -1,6 +1,3 @@
-export adjust_matfile
-
-
 """
 `adjust_matfile`
 read a matlab file from the photometry set up and turn it in a DataFrame

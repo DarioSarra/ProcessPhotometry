@@ -1,5 +1,3 @@
-export create_cam_DataIndex, create_photometry_DataIndex
-
 """
 'create_cam_DataIndex'
 given the path of the folder containing the Camera files create a DataFrame
