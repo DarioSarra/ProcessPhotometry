@@ -5,6 +5,7 @@ module ProcessPhotometry
 using Reexport
 @reexport using Flipping
 @reexport using CSV
+@reexport using MAT
 #@reexport using DSP
 
 include("search_files.jl")
