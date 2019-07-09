@@ -3,7 +3,7 @@
 identify all the pokes in and out and return a dataframe with the ordered index
 of every poke and their side
 """
-function observe_events(log, converted_rate = 50, acquisition_rate = 1000)
+function observe_events(analog, converted_rate = 50, acquisition_rate = 1000)
     bin_size = acquisition_rate / converted_rate
     R_in = find_events(columns(analog,:R_b),:in) .÷ bin_size
     R_out = find_events(columns(analog,:R_b),:out) .÷ bin_size
@@ -35,6 +35,8 @@ function observe_events(log, converted_rate = 50, acquisition_rate = 1000)
     end
 
     events = @apply events begin
+        @transform_vec {In = Int64.(:In)}
+        @transform_vec {Out = Int64.(:Out)}
         @transform_vec {Poke = collect(1:length(:In))}
         @transform_vec {Streak = Flipping.count_sequence(:Side)}
         @transform {Poke_Dur = (:Out - :In) / converted_rate + 0.1}
