@@ -56,6 +56,6 @@ function create_photometry_DataIndex(Directory_path::String, Exp_type::String,
     DataIndex[:Saving_path] = saving_path
     DataIndex[:Exp_Path]= replace(Camera_path,"Cam/"=>"")
     DataIndex[:Exp_Name]= String(split(DataIndex[1,:Exp_Path],"/")[end-1])
-    DataIndex[:Session] = [replace(t,"a.csv"=>"") for t in DataIndex[:Bhv_Session]]
+    DataIndex[:Session] = [replace(t,".csv"=>"") for t in DataIndex[:Bhv_Session]]
     return DataIndex
 end

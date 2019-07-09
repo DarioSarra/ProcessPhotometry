@@ -6,16 +6,19 @@ using Reexport
 @reexport using Flipping
 @reexport using CSV
 @reexport using MAT
-#@reexport using DSP
+@reexport using OrderedCollections
+@reexport using Recombinase
 
-include("search_files.jl")
+include("Search_files.jl")
 include("Mat_files.jl")
 include("Log_files.jl")
 include("Analyze_log.jl")
+include("Combine.jl")
 
 export create_cam_DataIndex, create_photometry_DataIndex
-export adjust_matfile
+export adjust_matfile, save_cam_dict
 export adjust_logfile
-export observe_events, find_events
+export observe_events, find_events, save_events_dict
+export combine_bhv_log
 
 end#module

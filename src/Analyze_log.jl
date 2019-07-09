@@ -3,6 +3,11 @@
 identify all the pokes in and out and return a dataframe with the ordered index
 of every poke and their side
 """
+function observe_events(analog_filepath::String,converted_rate = 50, acquisition_rate = 1000)
+    log = adjust_logfile(analog_filepath)
+    observe_events(log,converted_rate, acquisition_rate)
+end
+
 function observe_events(analog, converted_rate = 50, acquisition_rate = 1000)
     bin_size = acquisition_rate / converted_rate
     R_in = find_events(columns(analog,:R_b),:in) .÷ bin_size
@@ -57,4 +62,16 @@ function find_events(squarewave,which)
         indexes = findall(digital_trace[1:end-1] .& .!digital_trace[2:end])
     end
     return indexes
+end
+
+"""
+`save_events_dict`
+save a jld2 file cointainning all the events of the analog session in a dictionary
+"""
+function save_events_dict(DataIndex::DataFrames.AbstractDataFrame)
+    saving_dir = DataIndex[1,:Saving_path]
+    saving_path = joinpath(saving_dir,"events_dict.jld2")
+    events_dict = OrderedDict(DataIndex[idx,:Session] => ProcessPhotometry.observe_events(DataIndex[idx,:Log_Path]) for idx = 1:size(DataIndex,2))
+    @save saving_path events_dict
+    return events_dict
 end

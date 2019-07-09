@@ -19,10 +19,25 @@ function adjust_matfile(mat_filepath)
     names!(session_ref,[Symbol(i *"_ref") for i in labels],makeunique=true);
     session_ref[:Frame] = collect(1:size(session_ref,1));
     # join the signals and references in one dataframe
-    session=join(session_sig,session_ref;on = :Frame);
+    pre_session=join(session_sig,session_ref;on = :Frame);
+    session = table(pre_session)
     return session
 end
 ##
+
+"""
+`save_cam_dict`
+save a jld2 file cointainning all the camera session in a dictionary
+"""
+function save_cam_dict(DataIndex::DataFrames.AbstractDataFrame)
+    saving_dir = DataIndex[1,:Saving_path]
+    saving_path = joinpath(saving_dir,"camera_dict.jld2")
+    cam_dict = OrderedDict(DataIndex[idx,:Session] => ProcessPhotometry.adjust_matfile( DataIndex[idx,:Cam_Path]) for idx = 1:size(DataIndex,2))
+    @save saving_path cam_dict
+    return cam_dict
+end
+
+
 
 """
 `erase_bumps`

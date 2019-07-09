@@ -17,7 +17,7 @@ function adjust_logfile(analog_filepath, converted_rate, acquisition_rate) # opt
     bin_size = acquisition_rate / converted_rate
     analog = @apply analog begin
         @transform_vec {Frame = collect(1:length(:R_p))}
-        @byrow! :Frame = :Frame ÷ 20
+        @byrow! :Frame = Int64(round(:Frame / bin_size))
         summarize(mean, _, :Frame)
         @transform {R_b = :R_p > 4.7}
         @transform {L_b = :L_p > 4.7}
