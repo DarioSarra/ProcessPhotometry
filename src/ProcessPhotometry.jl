@@ -8,6 +8,7 @@ using Reexport
 @reexport using MAT
 @reexport using OrderedCollections
 @reexport using Recombinase
+@reexport using BSON
 
 include("Search_files.jl")
 include("Mat_files.jl")
@@ -19,6 +20,6 @@ export create_cam_DataIndex, create_photometry_DataIndex
 export adjust_matfile, save_cam_dict
 export adjust_logfile
 export observe_events, find_events, save_events_dict
-export combine_bhv_log
+export combine_bhv_log, combine_bhv_cam
 
 end#module

@@ -11,25 +11,25 @@ function adjust_logfile(analog_filepath)
     end
         return analog
 end
-
-function adjust_logfile(analog_filepath, converted_rate, acquisition_rate) # option to compress before finding events
-    analog = JuliaDB.loadtable(analog_filepath,header_exists = false, datacols = 1:4, colnames = [:timestamp,:R_p,:L_p,:Rew])
-    bin_size = acquisition_rate / converted_rate
-    analog = @apply analog begin
-        @transform_vec {Frame = collect(1:length(:R_p))}
-        @byrow! :Frame = Int64(round(:Frame / bin_size))
-        summarize(mean, _, :Frame)
-        @transform {R_b = :R_p > 4.7}
-        @transform {L_b = :L_p > 4.7}
-        @transform {Rew_b = :Rew < -4.7}
-    end
-    if columns(analog,:timestamp)[converted_rate+1] < 1
-        println("something is off with time conversion")
-        return nothing
-    else
-        return analog
-    end
-end
+#
+# function adjust_logfile(analog_filepath, converted_rate, acquisition_rate) # option to compress before finding events
+#     analog = JuliaDB.loadtable(analog_filepath,header_exists = false, datacols = 1:4, colnames = [:timestamp,:R_p,:L_p,:Rew])
+#     bin_size = acquisition_rate / converted_rate
+#     analog = @apply analog begin
+#         @transform_vec {Frame = collect(1:length(:R_p))}
+#         @byrow! :Frame = Int64(round(:Frame / bin_size))
+#         summarize(mean, _, :Frame)
+#         @transform {R_b = :R_p > 4.7}
+#         @transform {L_b = :L_p > 4.7}
+#         @transform {Rew_b = :Rew < -4.7}
+#     end
+#     if columns(analog,:timestamp)[converted_rate+1] < 1
+#         println("something is off with time conversion")
+#         return nothing
+#     else
+#         return analog
+#     end
+# end
 # analog = CSV.read(analog_filepath,header=false) |> DataFrame
 # analog = analog[:,1:6];
 # names!(analog,[:timestamp,:R_p,:L_p,:Rew,:SideHigh,:Protocol])

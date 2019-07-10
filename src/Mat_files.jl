@@ -19,7 +19,7 @@ function adjust_matfile(mat_filepath)
     names!(session_ref,[Symbol(i *"_ref") for i in labels],makeunique=true);
     session_ref[:Frame] = collect(1:size(session_ref,1));
     # join the signals and references in one dataframe
-    pre_session=join(session_sig,session_ref;on = :Frame);
+    pre_session= join(session_sig,session_ref;on = :Frame);
     session = table(pre_session)
     return session
 end
@@ -27,13 +27,20 @@ end
 
 """
 `save_cam_dict`
-save a jld2 file cointainning all the camera session in a dictionary
+save a BSON file cointainning all the camera session in a dictionary
 """
 function save_cam_dict(DataIndex::DataFrames.AbstractDataFrame)
-    saving_dir = DataIndex[1,:Saving_path]
-    saving_path = joinpath(saving_dir,"camera_dict.jld2")
+    exp_dir = DataIndex[1,:Saving_path]
+    exp_name = splitdir(exp_dir)[end]
+    saving_path = joinpath(exp_dir,exp_name*"_camera.jld")
     cam_dict = OrderedDict(DataIndex[idx,:Session] => ProcessPhotometry.adjust_matfile( DataIndex[idx,:Cam_Path]) for idx = 1:size(DataIndex,2))
-    @save saving_path cam_dict
+    name_list = Vector{Symbol}(undef,0)
+    for x in keys(cam_dict)
+        ongoing = colnames(cam_dict[x])
+        append!(name_list,ongoing)
+    end
+    cam_dict["trace_list"] = union(name_list)
+    BSON.@save saving_path cam_dict
     return cam_dict
 end
 

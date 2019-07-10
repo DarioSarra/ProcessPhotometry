@@ -3,7 +3,7 @@
 extract the events indexes from the log file and adds it to the Pokes files
 """
 
-function combine_bhv_log(DataIndex)
+function combine_bhv_log(DataIndex::DataFrames.AbstractDataFrame)
     rec = table()
     for idx in 1:size(DataIndex,2)
         pokes = table(process_pokes(DataIndex[idx,:Bhv_Path]))
@@ -21,4 +21,20 @@ function combine_bhv_log(DataIndex)
         end
     end
     return rec
+end
+
+
+"""
+`combine_bhv_cam`
+"""
+
+function combine_bhv_cam(DataIndex::DataFrames.AbstractDataFrame)
+    exp_dir = DataIndex[1,:Saving_path]
+    exp_name = splitdir(exp_dir)[end]
+    saving_path = joinpath(exp_dir,"photo_pokes_"*exp_name*".jld")
+    cam_dict = save_cam_dict(DataIndex)
+    rec = combine_bhv_log(DataIndex);
+    pokes = @transform rec {Traces = colnames(cam_dict[:Session])}
+    BSON.@save saving_path pokes
+    return pokes, cam_dict
 end

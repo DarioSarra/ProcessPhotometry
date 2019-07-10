@@ -66,12 +66,12 @@ end
 
 """
 `save_events_dict`
-save a jld2 file cointainning all the events of the analog session in a dictionary
+save a BSON file cointainning all the events of the analog session in a dictionary
 """
 function save_events_dict(DataIndex::DataFrames.AbstractDataFrame)
     saving_dir = DataIndex[1,:Saving_path]
-    saving_path = joinpath(saving_dir,"events_dict.jld2")
+    saving_path = joinpath(saving_dir,"events_dict.jld")
     events_dict = OrderedDict(DataIndex[idx,:Session] => ProcessPhotometry.observe_events(DataIndex[idx,:Log_Path]) for idx = 1:size(DataIndex,2))
-    @save saving_path events_dict
+    BSON.@save saving_path events_dict
     return events_dict
 end
