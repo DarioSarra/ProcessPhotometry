@@ -41,7 +41,7 @@ function create_photometry_DataIndex(Directory_path::String, Exp_type::String,
     camera=camera[[(d in good_days) for d in camera[:Day]],:];
 
     behavior = Flipping.find_behavior(Directory_path, Exp_type,Exp_name, Mice_suffix)
-    rename!(behavior,:Session=>:Bhv_Session)
+    DataFrames.rename!(behavior,:Session=>:Bhv_Session)
     dformat = Dates.DateFormat("yyyymmdd")
     behavior[:Day] = Date.(behavior[:Day],dformat)
     behavior = behavior[[(bho in good_days) for bho in behavior[:Day]],:];

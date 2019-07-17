@@ -9,6 +9,10 @@ using Reexport
 @reexport using OrderedCollections
 @reexport using Recombinase
 @reexport using BSON
+@reexport using StructArrays
+@reexport using IndexedTables
+@reexport using WeakRefStrings
+
 
 include("Search_files.jl")
 include("Mat_files.jl")
