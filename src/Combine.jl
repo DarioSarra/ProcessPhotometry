@@ -11,8 +11,14 @@ function combine_bhv_photo(DataIndex::DataFrames.AbstractDataFrame)
         events = observe_events(DataIndex[idx,:Log_Path])
         cam_session, framerate = adjust_matfile(DataIndex[idx,:Cam_Path])
         if length(pokes) == length(events)
-            ongoing = join(pokes,events, lkey=:Poke, rkey = :Poke)
-            trim = range(Int64(ongoing[1].In - 1*framerate),step=1,stop = Int64(ongoing[end].Out+1*framerate))
+            ongoing = join(pokes,events, lkey=:Poke, rkey = :Poke)#add indexes of In and Out
+            #calculate how much to trim form the camera
+            trim = range(Int64(ongoing[1].In - 2*framerate),step=1,stop = Int64(ongoing[end].Out+2*framerate))
+            #correct In and Out for the trimming of the data
+            ongoing = @apply ongoing begin
+                @transform  {In = :In - trim.start}
+                @transform  {Out = :Out - trim.start}
+            end
             cam_session = cam_session[trim]
             cam_dict[DataIndex[idx,:Session]] = cam_session
             if isempty(rec)
@@ -38,9 +44,14 @@ function save_bhv_photo(DataIndex::DataFrames.AbstractDataFrame)
     exp_name = splitdir(exp_dir)[end]
     saving_path = joinpath(exp_dir,"photo_pokes_"*exp_name*".jld")
     pokes, cam_dict = combine_bhv_photo(DataIndex);
-    #pokes = @transform rec {Traces = colnames(cam_dict[:Session])}
     BSON.@save saving_path pokes
-    saving_path = joinpath(exp_dir,"cam"*exp_name*".jld")
+    name_list = Vector{Symbol}(undef,0)
+    for x in keys(cam_dict)
+        ongoing = colnames(cam_dict[x])
+        append!(name_list,ongoing)
+    end
+    cam_dict["trace_list"] = union(name_list)
+    saving_path = joinpath(exp_dir,"cam_"*exp_name*".jld")
     BSON.@save saving_path cam_dict
     return pokes, cam_dict
 end
