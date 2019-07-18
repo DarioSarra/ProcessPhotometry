@@ -6,7 +6,7 @@ extract the events indexes from the log file and adds it to the Pokes files
 function combine_bhv_photo(DataIndex::DataFrames.AbstractDataFrame)
     rec = table()
     cam_dict = OrderedDict()
-    for idx in 1:size(DataIndex,2)
+    for idx in 1:size(DataIndex,1)
         pokes = table(process_pokes(DataIndex[idx,:Bhv_Path]))
         events = observe_events(DataIndex[idx,:Log_Path])
         cam_session, framerate = adjust_matfile(DataIndex[idx,:Cam_Path])
