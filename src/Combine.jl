@@ -7,28 +7,33 @@ function combine_bhv_photo(DataIndex::DataFrames.AbstractDataFrame)
     rec = table()
     cam_dict = OrderedDict()
     for idx in 1:size(DataIndex,1)
-        pokes = table(process_pokes(DataIndex[idx,:Bhv_Path]))
-        events = observe_events(DataIndex[idx,:Log_Path])
-        cam_session, framerate = adjust_matfile(DataIndex[idx,:Cam_Path])
-        if length(pokes) == length(events)
-            ongoing = join(pokes,events, lkey=:Poke, rkey = :Poke)#add indexes of In and Out
-            #calculate how much to trim form the camera
-            trim = range(Int64(ongoing[1].In - 2*framerate),step=1,stop = Int64(ongoing[end].Out+2*framerate))
-            #correct In and Out for the trimming of the data
-            ongoing = @apply ongoing begin
-                @transform  {In = :In - trim.start}
-                @transform  {Out = :Out - trim.start}
-            end
-            cam_session = cam_session[trim]
-            cam_dict[DataIndex[idx,:Session]] = cam_session
-            if isempty(rec)
-                rec = ongoing
+        try
+            pokes = table(process_pokes(DataIndex[idx,:Bhv_Path]))
+            events = observe_events(DataIndex[idx,:Log_Path])
+            cam_session, framerate = adjust_matfile(DataIndex[idx,:Cam_Path])
+            if length(pokes) == length(events)
+                ongoing = join(pokes,events, lkey=:Poke, rkey = :Poke)#add indexes of In and Out
+                #calculate how much to trim form the camera
+                trim = range(Int64(ongoing[1].In - 2*framerate),step=1,stop = Int64(ongoing[end].Out+2*framerate))
+                #correct In and Out for the trimming of the data
+                ongoing = @apply ongoing begin
+                    @transform  {In = :In - trim.start}
+                    @transform  {Out = :Out - trim.start}
+                end
+                cam_session = cam_session[trim]
+                cam_dict[DataIndex[idx,:Session]] = cam_session
+                if isempty(rec)
+                    rec = ongoing
+                else
+                    rec = merge(rec, ongoing)
+                end
             else
-                rec = merge(rec, ongoing)
+                println("mismatch: Pokes = $(length(pokes)) and Events = $(length(events)) session = $(DataIndex[idx, :Session])")
+                continue
             end
-        else
-            println("mismatch: Pokes = $(length(pokes)) and Events = $(length(events)) session = $(DataIndex[idx, :Session])")
-            continue
+        catch
+            println("some error in $(DataIndex[idx,:Session])")
+
         end
     end
     return rec, cam_dict
