@@ -31,9 +31,9 @@ function combine_bhv_photo(DataIndex::DataFrames.AbstractDataFrame)
                 println("mismatch: Pokes = $(length(pokes)) and Events = $(length(events)) session = $(DataIndex[idx, :Session])")
                 continue
             end
-        catch
+        catch e
             println("some error in $(DataIndex[idx,:Session])")
-
+            #println(sprint(showerror, e))
         end
     end
     return rec, cam_dict
