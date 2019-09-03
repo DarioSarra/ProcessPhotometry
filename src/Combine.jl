@@ -8,7 +8,7 @@ function combine_bhv_photo(DataIndex::DataFrames.AbstractDataFrame)
     cam_dict = OrderedDict()
     for idx in 1:size(DataIndex,1)
         try
-            pokes = table(process_pokes(DataIndex[idx,:Bhv_Path]))
+            pokes = table(Flipping.process_pokes(DataIndex[idx,:Bhv_Path]))
             events = observe_events(DataIndex[idx,:Log_Path])
             cam_session, framerate = adjust_matfile(DataIndex[idx,:Cam_Path])
             if length(pokes) == length(events)
@@ -50,6 +50,8 @@ function save_bhv_photo(DataIndex::DataFrames.AbstractDataFrame)
     saving_path = joinpath(exp_dir,"photo_pokes_"*exp_name*".jld")
     pokes, cam_dict = combine_bhv_photo(DataIndex);
     BSON.@save saving_path pokes
+    filetosave = joinpath(exp_dir,"photo_pokes_"*exp_name*".csv")
+    CSVFiles.save(filetosave,pokes)
     name_list = Vector{Symbol}(undef,0)
     for x in keys(cam_dict)
         ongoing = colnames(cam_dict[x])
@@ -58,5 +60,5 @@ function save_bhv_photo(DataIndex::DataFrames.AbstractDataFrame)
     cam_dict["trace_list"] = union(name_list)
     saving_path = joinpath(exp_dir,"cam_"*exp_name*".jld")
     BSON.@save saving_path cam_dict
-    return pokes, cam_dict
+    return pokes, streaks,cam_dict
 end
