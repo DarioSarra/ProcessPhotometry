@@ -50,8 +50,6 @@ function save_bhv_photo(DataIndex::DataFrames.AbstractDataFrame)
     saving_path = joinpath(exp_dir,"photo_pokes_"*exp_name*".jld")
     pokes, cam_dict = combine_bhv_photo(DataIndex);
     BSON.@save saving_path pokes
-    filetosave = joinpath(exp_dir,"photo_pokes_"*exp_name*".csv")
-    CSVFiles.save(filetosave,pokes)
     name_list = Vector{Symbol}(undef,0)
     for x in keys(cam_dict)
         ongoing = colnames(cam_dict[x])
@@ -60,5 +58,5 @@ function save_bhv_photo(DataIndex::DataFrames.AbstractDataFrame)
     cam_dict["trace_list"] = union(name_list)
     saving_path = joinpath(exp_dir,"cam_"*exp_name*".jld")
     BSON.@save saving_path cam_dict
-    return pokes, streaks,cam_dict
+    return pokes, cam_dict
 end
