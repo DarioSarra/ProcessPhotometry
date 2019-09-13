@@ -47,9 +47,20 @@ end
 function save_bhv_photo(DataIndex::DataFrames.AbstractDataFrame)
     exp_dir = DataIndex[1,:Saving_path]
     exp_name = splitdir(exp_dir)[end]
-    saving_path = joinpath(exp_dir,"photo_pokes_"*exp_name*".jld")
+
     pokes, cam_dict = combine_bhv_photo(DataIndex);
+    saving_path = joinpath(exp_dir,"photo_pokes_"*exp_name*".jld")
     BSON.@save saving_path pokes
+    filetosave = joinpath(exp_dir,"photo_pokes_"*exp_name*".csv")
+    CSVFiles.save(filetosave,pokes)
+
+    streaks = ProcessPhotometry.photo_streak(DataFrame(pokes));
+    saving_path = joinpath(exp_dir,"photo_streaks_"*exp_name*".jld")
+    BSON.@save saving_path streaks
+    simple = delete!(streaks,:PokeSequence)
+    filetosave = joinpath(exp_dir,"photo_streaks_"*exp_name*".csv")
+    CSVFiles.save(filetosave,simple)
+
     name_list = Vector{Symbol}(undef,0)
     for x in keys(cam_dict)
         ongoing = colnames(cam_dict[x])
@@ -58,5 +69,6 @@ function save_bhv_photo(DataIndex::DataFrames.AbstractDataFrame)
     cam_dict["trace_list"] = union(name_list)
     saving_path = joinpath(exp_dir,"cam_"*exp_name*".jld")
     BSON.@save saving_path cam_dict
-    return pokes, cam_dict
+
+    return pokes, streaks, cam_dict
 end

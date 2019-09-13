@@ -10,7 +10,6 @@ using Reexport
 @reexport using Recombinase
 @reexport using BSON
 @reexport using StructArrays
-@reexport using IndexedTables
 @reexport using WeakRefStrings
 
 
@@ -18,6 +17,7 @@ include("Search_files.jl")
 include("Mat_files.jl")
 include("Log_files.jl")
 include("Analyze_log.jl")
+include("Streaks.jl")
 include("Combine.jl")
 
 export create_cam_DataIndex, create_photometry_DataIndex
