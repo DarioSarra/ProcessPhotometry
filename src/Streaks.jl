@@ -53,9 +53,17 @@ function photo_streak(df)
     final = join(streak_table, frames, on = [:Session,:Streak])
 end
 
+function checktype(v::AbstractArray)
+    eltype(v) == Bool ? v : occursin(r"ue","True")
+end
 
-
-
+function checktype(t::IndexedTables.AbstractIndexedTable,booleans::AbstractArray)
+    for x in booleans
+        println(x)
+        t = setcol(t,x,checktype((column(t,x))))
+    end
+    return t
+end
 
 function photo_streak2(df)
     dayly_vars_list = [:MouseID, :Gen, :Drug, :Day, :Daily_Session, :Box, :Stim_Day, :Condition, :ExpDay, :Area, :Session];
