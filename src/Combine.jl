@@ -36,12 +36,16 @@ function combine_bhv_photo(DataIndex::DataFrames.AbstractDataFrame)
             #println(sprint(showerror, e))
         end
     end
-    return rec, cam_dict
+    c = @transform_vec rec {Exp_Day = ProcessPhotometry.calendar(:Day)}
+    cc = @apply c :Protocol flatten = true begin
+         @transform_vec {Protocol_Day = calendar(:Day)}
+     end
+    return cc, cam_dict
 end
 
 
 """
-`combine_bhv_cam`
+`save_bhv_photo`
 """
 
 function save_bhv_photo(DataIndex::DataFrames.AbstractDataFrame)
@@ -54,10 +58,12 @@ function save_bhv_photo(DataIndex::DataFrames.AbstractDataFrame)
     filetosave = joinpath(exp_dir,"photo_pokes_"*exp_name*".csv")
     CSVFiles.save(filetosave,pokes)
 
-    streaks = ProcessPhotometry.photo_streak(DataFrame(pokes));
-    saving_path = joinpath(exp_dir,"photo_streaks_"*exp_name*".jld")
+    streaks = table(ProcessPhotometry.photo_streak(DataFrame(pokes)));
+    dayly_vars_list = [:MouseID, :Gen, :Drug, :Day, :Daily_Session, :Box, :Stim_Day, :Condition, :Exp_Day,:Protocol_Day, :Area];
+    session_vars = Flipping.by_summary(pokes,:Session,dayly_vars_list);
+    streaks = join(streaks,session_vars;lkey = :Session, rkey = :Session)
     BSON.@save saving_path streaks
-    simple = delete!(streaks,:PokeSequence)
+    simple = popcol(streaks,:PokeSequence)
     filetosave = joinpath(exp_dir,"photo_streaks_"*exp_name*".csv")
     CSVFiles.save(filetosave,simple)
 

@@ -1,5 +1,5 @@
 function photo_streak(df)
-    dayly_vars_list = [:MouseID, :Gen, :Drug, :Day, :Daily_Session, :Box, :Stim_Day, :Condition, :ExpDay, :Area, :Session];
+    dayly_vars_list = [:MouseID, :Gen, :Drug, :Day, :Daily_Session, :Box, :Stim_Day, :Condition, :Exp_Day,:Protocol_Day, :Area, :Session];
     booleans=[:Reward,:Side,:SideHigh,:Stim,:Wall,:Correct,:Stim_Day]#columns to convert to Bool
     for x in booleans
         df[!,x] = eltype(df[!,x]) == Bool ? df[!,x] : occursin.("true",df[!,x])
@@ -28,11 +28,7 @@ function photo_streak(df)
         Side = dd[1,:Side],
         ReverseStreak = dd[1,:ReverseStreak]
         )
-        for s in dayly_vars_list
-            if s in names(df)
-                dt[!,s] .= df[1, s]
-            end
-        end
+
         return dt
     end
     ##

@@ -14,6 +14,7 @@ using Reexport
 
 
 include("Search_files.jl")
+include("utilities.jl")
 include("Mat_files.jl")
 include("Log_files.jl")
 include("Analyze_log.jl")
