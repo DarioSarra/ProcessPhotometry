@@ -28,9 +28,9 @@ with the session informations
 """
 
 function create_photometry_DataIndex(Directory_path::String, Exp_type::String,
-    Exp_name::String, Mice_suffix::String; bad_days = Date(2014-01-01):Day(1):Date(2014-01-02))
+    Exp_name::String, Mice_suffix::String; bad_days = Date(2014-01-01):Day(1):Date(2014-01-02); run_task = "run_task_photo")
 
-    Camera_path = joinpath(Directory_path,"run_task_photo",Exp_name,"Cam")
+    Camera_path = joinpath(Directory_path,run_task,Exp_name,"Cam")
     Behavior_path = joinpath(Directory_path,"run_task_photo","raw_data")
     saving_path = joinpath(Directory_path,"Datasets",Exp_type,Exp_name)
 
