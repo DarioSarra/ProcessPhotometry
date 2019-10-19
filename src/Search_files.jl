@@ -6,18 +6,18 @@ with the session informations
 
 function create_cam_DataIndex(Camera_path::String)
     camera = DataFrame(Cam_Path = get_data(Camera_path,:cam))
-    camera[:Cam_Session] = [split(t,"/")[end] for t in camera[:Cam_Path]]
+    camera[!,:Cam_Session] = [split(t,"/")[end] for t in camera[:,:Cam_Path]]
     #extract date and mouse ID per session using get_mousedate (it works with a full path)
     # compose logAI file name from mat file
-    camera[:Log_Session]=[replace(f, ".mat"=>"_logAI.csv") for f in camera[:Cam_Session]];
-    camera[:Log_Path]=[replace(f, ".mat"=>"_logAI.csv") for f in camera[:Cam_Path]];
+    camera[!,:Log_Session]=[replace(f, ".mat"=>"_logAI.csv") for f in camera[:,:Cam_Session]];
+    camera[!,:Log_Path]=[replace(f, ".mat"=>"_logAI.csv") for f in camera[:,:Cam_Path]];
     #Identifies information from file name using get_mousedate function in a for loop
-    camera[:MouseID] = String.([split(t,"_")[1] for t in camera[:Cam_Session]])
-    camera[:Area] = String.([split(t,"_")[2] for t in camera[:Cam_Session]])
-    camera[:Day] = String.([match.(r"\d{8}",t).match for t in camera[:Cam_Path]])
+    camera[!,:MouseID] = String.([split(t,"_")[1] for t in camera[:,:Cam_Session]])
+    camera[!,:Area] = String.([split(t,"_")[2] for t in camera[:,:Cam_Session]])
+    camera[!,:Day] = String.([match.(r"\d{8}",t).match for t in camera[:,:Cam_Path]])
     dformat = Dates.DateFormat("yyyymmdd")
-    camera[:Day] = Date.(camera[:Day],dformat)
-    camera[:Period] = String.([match.(r"[a-z]{1}",t).match for t in camera[:Cam_Session]])
+    camera[!,:Day] = Date.(camera[:,:Day],dformat)
+    camera[!,:Period] = String.([match.(r"[a-z]{1}",t).match for t in camera[:,:Cam_Session]])
     return camera
 end
 
@@ -43,7 +43,7 @@ function create_photometry_DataIndex(Directory_path::String, Exp_type::String,
     behavior = Flipping.find_behavior(Directory_path, Exp_type,Exp_name, Mice_suffix; run_task = run_task)
     DataFrames.rename!(behavior,:Session=>:Bhv_Session)
     dformat = Dates.DateFormat("yyyymmdd")
-    behavior[:Day] = Date.(behavior[:Day],dformat)
+    behavior[!,:Day] = Date.(behavior[:,:Day],dformat)
     behavior = behavior[[(bho in good_days) for bho in behavior[:Day]],:];
 
     println("accordance between cam and behavior dates");
@@ -53,9 +53,9 @@ function create_photometry_DataIndex(Directory_path::String, Exp_type::String,
     end
 
     DataIndex = join(camera, behavior, on = [:MouseID, :Day, :Period], kind = :inner, makeunique = true)
-    DataIndex[:Saving_path] = saving_path
-    DataIndex[:Exp_Path]= replace(Camera_path,"Cam/"=>"")
-    DataIndex[:Exp_Name]= String(split(DataIndex[1,:Exp_Path],"/")[end-1])
-    DataIndex[:Session] = [replace(t,".csv"=>"") for t in DataIndex[:Bhv_Session]]
+    DataIndex[!,:Saving_Path] .= saving_path
+    DataIndex[!,:Exp_Path] .= replace(Camera_path,"Cam/"=>"")
+    DataIndex[!,:Exp_Name] .= String(split(DataIndex[1,:Exp_Path],"/")[end-1])
+    DataIndex[!,:Session] = [replace(t,".csv"=>"") for t in DataIndex[:Bhv_Session]]
     return DataIndex
 end
