@@ -31,15 +31,15 @@ function adjust_matfile(mat_filepath)
     session_sig = DataFrame(matvars["sig"]);
     names!(session_sig,[Symbol(i *"_sig") for i in labels],makeunique=true);
     for name in names(session_sig)
-        session_sig[name] = erase_bumps(session_sig[name])
+        session_sig[!,name] = erase_bumps(session_sig[:,name])
     end
-    session_sig[:Frame] = collect(1:size(session_sig,1))
+    session_sig[!,:Frame] = collect(1:size(session_sig,1))
     session_ref = DataFrame(matvars["ref"]);
     names!(session_ref,[Symbol(i *"_ref") for i in labels],makeunique=true);
     for name in names(session_ref)
-        session_ref[name] = erase_bumps(session_ref[name])
+        session_ref[!,name] = erase_bumps(session_ref[:,name])
     end
-    session_ref[:Frame] = collect(1:size(session_ref,1));
+    session_ref[!,:Frame] = collect(1:size(session_ref,1));
     # join the signals and references in one dataframe
     pre_session= join(session_sig,session_ref;on = :Frame);
     session = table(pre_session)

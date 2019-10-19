@@ -49,13 +49,13 @@ end
 """
 
 function save_bhv_photo(DataIndex::DataFrames.AbstractDataFrame)
-    exp_dir = DataIndex[1,:Saving_path]
+    exp_dir = DataIndex[1,:Saving_Path]
     exp_name = splitdir(exp_dir)[end]
 
     pokes, cam_dict = combine_bhv_photo(DataIndex);
-    saving_path = joinpath(exp_dir,"photo_pokes_"*exp_name*".jld")
+    saving_path = joinpath(exp_dir,"pokes_"*exp_name*".jld")
     BSON.@save saving_path pokes
-    filetosave = joinpath(exp_dir,"photo_pokes_"*exp_name*".csv")
+    filetosave = joinpath(exp_dir,"pokes_"*exp_name*".csv")
     CSVFiles.save(filetosave,pokes)
 
     streaks = table(ProcessPhotometry.photo_streak(DataFrame(pokes)));
@@ -63,8 +63,8 @@ function save_bhv_photo(DataIndex::DataFrames.AbstractDataFrame)
     session_vars = Flipping.by_summary(pokes,:Session,dayly_vars_list);
     streaks = join(streaks,session_vars;lkey = :Session, rkey = :Session)
     BSON.@save saving_path streaks
-    simple = popcol(streaks,:PokeSequence)
-    filetosave = joinpath(exp_dir,"photo_streaks_"*exp_name*".csv")
+    simple = JuliaDB.select(streaks,JuliaDB.Not(:PokeSequence))
+    filetosave = joinpath(exp_dir,"streaks_"*exp_name*".csv")
     CSVFiles.save(filetosave,simple)
 
     name_list = Vector{Symbol}(undef,0)

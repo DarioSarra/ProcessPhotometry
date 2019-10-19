@@ -36,26 +36,26 @@ function create_photometry_DataIndex(Directory_path::String, Exp_type::String,
 
     camera = create_cam_DataIndex(Camera_path)
 
-    exp_days = minimum(camera[:Day]):Day(1):maximum(camera[:Day])
+    exp_days = minimum(camera[:,:Day]):Day(1):maximum(camera[:,:Day])
     good_days = [day for day in exp_days if ! (day in bad_days)];
-    camera=camera[[(d in good_days) for d in camera[:Day]],:];
+    camera=camera[[(d in good_days) for d in camera[:,:Day]],:];
 
     behavior = Flipping.find_behavior(Directory_path, Exp_type,Exp_name, Mice_suffix; run_task = run_task)
     DataFrames.rename!(behavior,:Session=>:Bhv_Session)
     dformat = Dates.DateFormat("yyyymmdd")
     behavior[!,:Day] = Date.(behavior[:,:Day],dformat)
-    behavior = behavior[[(bho in good_days) for bho in behavior[:Day]],:];
+    behavior = behavior[[(bho in good_days) for bho in behavior[:,:Day]],:];
 
     println("accordance between cam and behavior dates");
-    println(sort(union(behavior[:Day])) == sort(union(camera[:Day])));
-    if sort(union(behavior[:Day])) != sort(union(camera[:Day]))
-        println(symdiff(sort(union(camera[:Day])),sort(union(behavior[:Day]))))
+    println(sort(union(behavior[:,:Day])) == sort(union(camera[:,:Day])));
+    if sort(union(behavior[:,:Day])) != sort(union(camera[:,:Day]))
+        println(symdiff(sort(union(camera[:,:Day])),sort(union(behavior[:,:Day]))))
     end
 
     DataIndex = join(camera, behavior, on = [:MouseID, :Day, :Period], kind = :inner, makeunique = true)
     DataIndex[!,:Saving_Path] .= saving_path
     DataIndex[!,:Exp_Path] .= replace(Camera_path,"Cam/"=>"")
     DataIndex[!,:Exp_Name] .= String(split(DataIndex[1,:Exp_Path],"/")[end-1])
-    DataIndex[!,:Session] = [replace(t,".csv"=>"") for t in DataIndex[:Bhv_Session]]
+    DataIndex[!,:Session] = [replace(t,".csv"=>"") for t in DataIndex[:,:Bhv_Session]]
     return DataIndex
 end
